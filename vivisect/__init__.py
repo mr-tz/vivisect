@@ -756,6 +756,11 @@ class VivWorkspace(e_mem.MemoryObject, viv_base.VivWorkspaceCore):
         If the address appears to be the start of a string, then
         return the string length in bytes, else return -1.
         '''
+        loc = self.getLocation(va)
+        if loc is not None:
+            if loc[2] == LOC_STRING:
+                return loc[1]
+
         plen = 0 # pascal string length
         dlen = 0 # delphi string length
         if self.isReadable(va-4):
@@ -794,12 +799,17 @@ class VivWorkspace(e_mem.MemoryObject, viv_base.VivWorkspaceCore):
         '''
         #FIXME this does not detect Unicode...
 
+        loc = self.getLocation(va)
+        if loc is not None:
+            if loc[2] == LOC_UNI:
+                return loc[1]
+
         offset, bytes = self.getByteDef(va)
         maxlen = len(bytes) + offset
         count = 0
         while count < maxlen:
             # If we hit another thing, then probably not...
-            if self.getLocation(va+count) != None:
+            if count != 0 and self.getLocation(va+count) != None:
                 return -1
 
             c0 = bytes[offset+count]
