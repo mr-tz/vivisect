@@ -13,7 +13,6 @@ import string
 import struct
 import weakref
 import hashlib
-import logging
 import itertools
 import traceback
 import threading
@@ -756,11 +755,6 @@ class VivWorkspace(e_mem.MemoryObject, viv_base.VivWorkspaceCore):
         If the address appears to be the start of a string, then
         return the string length in bytes, else return -1.
         '''
-        loc = self.getLocation(va)
-        if loc is not None:
-            if loc[2] == LOC_STRING:
-                return loc[1]
-
         plen = 0 # pascal string length
         dlen = 0 # delphi string length
         if self.isReadable(va-4):
@@ -770,8 +764,10 @@ class VivWorkspace(e_mem.MemoryObject, viv_base.VivWorkspaceCore):
         maxlen = len(bytes) - offset
         count = 0
         while count < maxlen:
-            # If we hit another thing, then probably not...
-            if self.getLocation(va+count) != None:
+            # If we hit another thing, then probably not.
+            # Ignore when count==0 so detection can check something
+            # already set as a location.
+            if (count > 0) and (self.getLocation(va+count) != None):
                 return -1
             c = bytes[offset+count]
             # The "strings" algo basically says 4 or more...
@@ -799,17 +795,14 @@ class VivWorkspace(e_mem.MemoryObject, viv_base.VivWorkspaceCore):
         '''
         #FIXME this does not detect Unicode...
 
-        loc = self.getLocation(va)
-        if loc is not None:
-            if loc[2] == LOC_UNI:
-                return loc[1]
-
         offset, bytes = self.getByteDef(va)
         maxlen = len(bytes) + offset
         count = 0
         while count < maxlen:
-            # If we hit another thing, then probably not...
-            if count != 0 and self.getLocation(va+count) != None:
+            # If we hit another thing, then probably not.
+            # Ignore when count==0 so detection can check something
+            # already set as a location.
+            if (count > 0) and (self.getLocation(va+count) != None):
                 return -1
 
             c0 = bytes[offset+count]
@@ -903,7 +896,7 @@ class VivWorkspace(e_mem.MemoryObject, viv_base.VivWorkspaceCore):
             except envi.InvalidInstruction, msg:
                 #FIXME something is just not right about this...
                 bytes = self.readMemory(va, 16)
-                logging.getLogger("vivisect.VivWorkspace.makeOpcode").warning("Invalid Instruct Attempt At: %s %s", hex(va), bytes.encode("hex"))
+                print "Invalid Instruct Attempt At:",hex(va),bytes.encode("hex")
                 raise InvalidLocation(va,msg)
 
             except Exception, msg:
@@ -1010,16 +1003,6 @@ class VivWorkspace(e_mem.MemoryObject, viv_base.VivWorkspaceCore):
                     continue
                 if ref != None and self.isValidPointer(ref):
                     self.addXref(va, ref, REF_PTR)
-                    # Save the content if it points to a string constant
-                    # in a defined memory segment.
-                    if self.getSegment(ref) :
-                        sz = self.detectString(ref)
-                        if sz > 0 :
-                            self.addLocation(ref, sz, LOC_STRING)
-                        else :
-                            sz = self.detectUnicode(ref)
-                            if sz > 0 :
-                                self.addLocation(ref, sz, LOC_UNI)
 
         return loc
 
@@ -1989,7 +1972,7 @@ class VivWorkspace(e_mem.MemoryObject, viv_base.VivWorkspaceCore):
         if filelocal:
             segtup = self.getSegment(va)
             if segtup == None:
-                logging.getLogger("vivisect.VivWorkspace.makeName").warning("Failed to find file for 0x%.8x (%s) (and filelocal == True!)", va, name)
+                print "Failed to find file for 0x%.8x (%s) (and filelocal == True!)"  % (va, name)
             if segtup != None:
                 fname = segtup[SEG_FNAME]
                 if fname != None:
