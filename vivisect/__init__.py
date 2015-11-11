@@ -770,7 +770,7 @@ class VivWorkspace(e_mem.MemoryObject, viv_base.VivWorkspaceCore):
             if (count > 0):
                 loc = self.getLocation(va+count)
                 if loc and loc[L_LTYPE] == LOC_STRING:
-                    return loc[L_VA] - va + loc[L_SIZE]
+                    return loc[L_VA] - (va + count) + loc[L_SIZE]
                 return -1
             c = bytes[offset+count]
             # The "strings" algo basically says 4 or more...
@@ -807,8 +807,8 @@ class VivWorkspace(e_mem.MemoryObject, viv_base.VivWorkspaceCore):
             # already set as a location.
             if (count > 0):
                 loc = self.getLocation(va+count)
-                if loc and loc[L_LTYPE] == LOC_UNICODE:
-                    return loc[L_VA] - va + loc[L_SIZE]
+                if loc and loc[L_LTYPE] == LOC_UNI:
+                    return loc[L_VA] - (va + count) + loc[L_SIZE]
                 return -1
 
             c0 = bytes[offset+count]
