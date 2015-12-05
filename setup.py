@@ -14,6 +14,9 @@ setup(
              '*.c', '*.h', 'Makefile',],
         },
     scripts=['vdbbin', 'vivbin',],
+    install_requires=[
+          "pycparser",
+    ],
     description='',
     zip_safe=False,
     classifiers=[
