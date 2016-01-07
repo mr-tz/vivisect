@@ -13,7 +13,12 @@ setup(
         '': ['*.dll', '*.dylib', '*.yes', '*.cfg', '*.lyt',
              '*.c', '*.h', 'Makefile',],
         },
-    scripts=['vdbbin', 'vivbin',],
+    entry_points={
+        "console_scripts": [
+            "vivbin=vivisect.vivbin:main",
+            "vdbbin=vdb.vdbbin:main",
+        ]
+    },
     description='',
     zip_safe=False,
     classifiers=[
