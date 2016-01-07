@@ -1,7 +1,7 @@
 import envi
 import vivisect
 import vstruct.defs.ihex as v_ihex
-import vivisect.parsers as v_parsers
+from .utils import md5File
 
 from vivisect.const import *
 
@@ -17,7 +17,7 @@ def parseFile(vw, filename):
     vw.setMeta('Platform','Unknown')
     vw.setMeta('Format','ihex')
 
-    fname = vw.addFile(filename, 0, v_parsers.md5File(filename))
+    fname = vw.addFile(filename, 0, md5File(filename))
 
     ihex = v_ihex.IHexFile()
     ihex.vsParse( file(filename, 'rb').read() )
