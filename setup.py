@@ -1,6 +1,5 @@
 from setuptools import setup, find_packages
 
-
 setup(
     name='vivisect',
     author='',
@@ -19,6 +18,9 @@ setup(
             "vdbbin=vdb.vdbbin:main",
         ]
     },
+    install_requires=[
+          "pycparser",
+    ],
     description='',
     zip_safe=False,
     classifiers=[

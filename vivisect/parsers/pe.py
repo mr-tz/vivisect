@@ -6,7 +6,7 @@ import vstruct
 import vivisect
 import PE.carve as pe_carve
 import cStringIO as StringIO
-import vivisect.parsers as v_parsers
+from .utils import md5File
 
 # Steal symbol parsing from vtrace
 import vtrace
@@ -102,7 +102,7 @@ def loadPeIntoWorkspace(vw, pe, filename=None):
 
     fhash = "unknown hash"
     if os.path.exists(filename):
-        fhash = v_parsers.md5File(filename)
+        fhash = md5File(filename)
 
     fname = vw.addFile(fvivname.lower(), baseaddr, fhash)
 
