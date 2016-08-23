@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import os
 import imp
@@ -13,6 +13,7 @@ import traceback
 
 import vivisect
 import vivisect.cli as viv_cli
+import envi.config as e_config
 import envi.threads as e_threads
 import vivisect.parsers as viv_parsers
 
@@ -43,7 +44,25 @@ def main():
     vw.verbose = args.verbose
 
     if args.option is not None:
-        vw.config.parseConfigOption(args.option)
+        if args.option in ('-h','?'):
+            print(vw.config.reprConfigPaths())
+            sys.exit(-1)
+
+        try:
+            vw.config.parseConfigOption(args.option)
+        except e_config.ConfigNoAssignment, e:
+            print(vw.config.reprConfigPaths() + "\n")
+            print(e)
+            print("syntax: \t-O <secname>.<optname>=<optval> (optval must be json syntax)")
+            sys.exit(-1)
+
+        except Exception, e:
+            print(vw.config.reprConfigPaths())
+            print("With entry: %s" % args.option)
+            print(e)
+            sys.exit(-1)
+
+
 
     if args.storage_name is not None:
         vw.setMeta("StorageModule", args.storage_name)
