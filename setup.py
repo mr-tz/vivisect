@@ -4,7 +4,7 @@ setup(
     name='vivisect',
     author='',
     author_email='',
-    version='',
+    version='0.0.20170519',
     url='https://github.com/vivisect/vivisect',
     py_modules=[''],
     packages=find_packages(),
