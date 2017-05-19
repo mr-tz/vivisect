@@ -1,6 +1,6 @@
 import os
 
-import vivisect.parsers as viv_parsers
+from .utils import md5File
 import vstruct.defs.macho as vs_macho
 import vivisect.analysis.i386 as viv_a_i386
 
@@ -67,7 +67,7 @@ def _loadMacho(vw, filebytes, filename=None):
     # Add the file entry
     hash = "unknown hash"
     if os.path.exists(filename):
-        hash = viv_parsers.md5File(filename)
+        hash = md5File(filename)
 
     fname = vw.addFile(filename, baseaddr, hash)
 

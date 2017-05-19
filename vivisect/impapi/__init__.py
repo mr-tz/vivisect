@@ -64,7 +64,6 @@ class ImportApi:
         api = api.lower()
         arch = arch.lower()
         modname = 'vivisect.impapi.%s.%s' % ( api, arch )
-        #mod = imp.load_module( modname, *imp.find_module( modname ) )
         __import__( modname )
         mod = sys.modules[ modname ]
         self._api_lookup.update( mod.api )

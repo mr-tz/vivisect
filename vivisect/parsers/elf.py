@@ -3,7 +3,7 @@ import struct
 
 import Elf
 import vivisect
-import vivisect.parsers as v_parsers
+from .utils import md5File
 
 from vivisect.const import *
 
@@ -114,7 +114,7 @@ def loadElfIntoWorkspace(vw, elf, filename=None):
 
     fhash = "unknown hash"
     if os.path.exists(filename):
-        fhash = v_parsers.md5File(filename)
+        fhash = md5File(filename)
 
     fname = vw.addFile(filename.lower(), baseaddr, fhash)
 

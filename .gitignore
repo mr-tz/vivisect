@@ -3,4 +3,7 @@
 *.swo
 *.py~
 .hg*
+build
+dist
+*.egg-info
 .idea

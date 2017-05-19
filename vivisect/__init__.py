@@ -43,6 +43,7 @@ import vivisect.base as viv_base
 import vivisect.parsers as viv_parsers
 import vivisect.codegraph as viv_codegraph
 import vivisect.impemu.lookup as viv_imp_lookup
+import vivisect.analysis.pe as viv_pe
 
 from vivisect.exc import *
 from vivisect.const import *
@@ -418,7 +419,12 @@ class VivWorkspace(e_mem.MemoryObject, viv_base.VivWorkspaceCore):
         """
         if self.amods.has_key(modname):
             return
-        mod = self.loadModule(modname)
+
+        if modname == "vivisect.analysis.pe":
+            # HACK(wb): sorry.
+            mod = viv_pe
+        else:
+            mod = self.loadModule(modname)
         self.amods[modname] = mod
         self.amodlist.append(modname)
 

@@ -419,6 +419,7 @@ class WorkspaceEmulator:
         '''
         va = self.nextVivTaint()
         self.taints[ va & 0xffffe000 ] = (va,typename,taint)
+        #print("taint: %s %s %s %s" % (typename, taint, hex(va), hex(va & 0xffffe000)))
         return va
 
     def getVivTaint(self, va):
@@ -555,6 +556,7 @@ class WorkspaceEmulator:
         if loc != None:
             lva, lsize, ltype, ltinfo = loc
             if ltype == LOC_IMPORT and lsize == size: # They just read an import.
+                #print("read import: %s" % (ltinfo))
                 ret = self.setVivTaint('import', loc)
                 return e_bits.buildbytes(ret, lsize)
 

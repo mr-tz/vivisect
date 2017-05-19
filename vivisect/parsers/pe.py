@@ -1,11 +1,12 @@
 
 import os
+import logging
 import PE
 import vstruct
 import vivisect
 import PE.carve as pe_carve
 import cStringIO as StringIO
-import vivisect.parsers as v_parsers
+from .utils import md5File
 
 # Steal symbol parsing from vtrace
 import vtrace
@@ -55,11 +56,6 @@ defcalls = {
     'amd64':'msx64call',
 }
 
-# map PE relocation types to vivisect types where possible
-relmap = {
-    PE.IMAGE_REL_BASED_HIGHLOW:vivisect.RTYPE_BASERELOC,
-}
-
 def loadPeIntoWorkspace(vw, pe, filename=None):
 
     mach = pe.IMAGE_NT_HEADERS.FileHeader.Machine
@@ -106,7 +102,7 @@ def loadPeIntoWorkspace(vw, pe, filename=None):
 
     fhash = "unknown hash"
     if os.path.exists(filename):
-        fhash = v_parsers.md5File(filename)
+        fhash = md5File(filename)
 
     fname = vw.addFile(fvivname.lower(), baseaddr, fhash)
 
@@ -291,7 +287,7 @@ def loadPeIntoWorkspace(vw, pe, filename=None):
                 vw.markDeadData(secbase, secbase+len(secbytes))
 
         except Exception, e:
-            print("Error Loading Section (%s size:%d rva:%.8x offset: %d): %s" % (secname,secfsize,secrva,secoff,e))
+            logging.getLogger("parsers.pe.loadPE").warning("Error Loading Section (%s size:%d rva:%.8x offset: %d): %s", secname, secfsize, secrva, secoff, e)
 
     vw.addExport(entry, EXP_FUNCTION, '__entry', fname)
     vw.addEntryPoint(entry)
@@ -303,13 +299,7 @@ def loadPeIntoWorkspace(vw, pe, filename=None):
     vw.setFileMeta(fname, "reloc_va", reloc_va)
 
     for rva,rtype in pe.getRelocations():
-
-        # map PE reloc to VIV reloc ( or dont... )
-        vtype = relmap.get(rtype)
-        if vtype == None:
-            continue
-
-        vw.addRelocation(rva+baseaddr, vtype)
+        vw.addRelocation(rva+baseaddr, vivisect.RTYPE_BASERELOC)
 
     for rva, lname, iname in pe.getImports():
         if vw.probeMemory(rva+baseaddr, 4, e_mem.MM_READ):
